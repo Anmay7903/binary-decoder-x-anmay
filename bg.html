@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Image Carousel</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .carousel-container {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .carousel-track {
+            display: flex;
+            height: 100%;
+            will-change: transform;
+        }
+
+        .carousel-track img {
+            width: auto;
+            height: 100%;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="carousel-container">
+        <div id="carousel" class="carousel-track"></div>
+    </div>
+
+    <script>
+       const defaultImages = [
+      "https://ik.imagekit.io/qoobmximx/%E2%9A%9D_%20Tanjiro%20__%20%E1%B4%AC%E1%B4%B5.jpg",
+            "https://ik.imagekit.io/qoobmximx/tanjiro.jpg",
+            "https://ik.imagekit.io/qoobmximx/download%20(3).jpg",
+            "https://ik.imagekit.io/qoobmximx/download%20(2).jpg",
+            "https://ik.imagekit.io/qoobmximx/%E2%98%86%20Rengoku%20Kyoujoro.jpg",
+            "https://ik.imagekit.io/qoobmximx/Satoru%20Gojo.jpg",
+            "https://ik.imagekit.io/qoobmximx/Nezuko%20(1).jpg",
+
+        ];
+
+
+        const data = JSON.parse(localStorage.getItem("carouselData")) || {
+            images: defaultImages,
+            scrollSpeed: 3,
+        };
+
+        const carousel = document.getElementById("carousel");
+        const allImages = [...data.images, ...data.images]; // Duplicate for seamless loop
+
+        allImages.forEach(src => {
+            const img = document.createElement("img");
+            img.src = src;
+            carousel.appendChild(img);
+        });
+
+        let scrollSpeed = parseFloat(data.scrollSpeed || 0.1);
+        let position = 0;
+
+        function animate() {
+            position += scrollSpeed;
+            const totalWidth = carousel.scrollWidth / 2;
+
+            if (position >= totalWidth) {
+                position = 0; // Reset when halfway through (since we duplicated)
+            }
+
+            carousel.style.transform = `translateX(-${position}px)`;
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+
+        // Trigger redirect on any interaction (touch or click)
+        document.addEventListener('click', redirectToAdmin);
+        document.addEventListener('touchstart', redirectToAdmin);
+
+        function redirectToAdmin() {
+            window.location.href = 'admin.html';
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Binary ↔ Text Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            position: relative;
+            color: white;
+            background: transparent;
+            backdrop-filter: blur(3px);
+        }
+
+        .background-iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            border: none;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+
+            font-family: monospace;
+            font-size: 1rem;
+            background: transparent;
+            backdrop-filter: blur(2px);
+            color: white;
+            resize: vertical;
+            transition: border 0.3s;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            flex: 1 1 auto;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: transparent;
+
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+
+        }
+
+        button:hover {
+            background: black;
+            filter: brightness(90%);
+            border: 1px solid #000000;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+
+
+        .error {
+            color: rgb(255, 0, 0);
+            text-shadow: rgb(255, 0, 0);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        @media (max-width: 576px) {
+            .upload-container {
+                padding: 20px;
+                border-radius: 8px;
+                max-width: 95%;
+                margin: 0 10px;
+            }
+
+            .btn-group-custom {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-custom {
+                width: 100%;
+                font-size: 1rem;
+                padding: 10px;
+            }
+
+            label {
+                font-size: 0.95rem;
+            }
+
+            input[type="url"],
+            input[type="file"] {
+                font-size: 0.95rem;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Background HTML -->
+    <iframe src="bg.html" class="background-iframe"></iframe>
+
+    <!-- Foreground Content -->
+    <div class="container">
+        <h1>Binary ↔ Text Converter</h1>
+
+        <textarea id="input" placeholder="Enter binary or text..."></textarea>
+        <div class="error" id="error"></div>
+        <div class="controls">
+            <button onclick="copyOutput()">📋 Copy Output</button>
+            <button onclick="clearFields()">Clear</button>
+            <button onclick="adminAction()">admin</button>
+
+        </div>
+
+        <textarea id="output" readonly placeholder="Output appears here..."></textarea>
+
+        <footer class="footer">
+            &copy; 2025 𝙰𝙼𝚅-νινє𝐗 . All rights reserved.
+        </footer>
+
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const error = document.getElementById('error');
+        const body = document.body;
+
+        input.addEventListener('input', () => {
+            const value = input.value.trim();
+            if (!value) {
+                output.value = '';
+                error.style.display = 'none';
+                return;
+            }
+
+            if (/^[01\s]+$/.test(value)) {
+                try {
+                    const text = value
+                        .split(/\s+/)
+                        .map(bin => {
+                            if (bin.length !== 8) throw new Error("Invalid binary length");
+                            return String.fromCharCode(parseInt(bin, 2));
+                        })
+                        .join('');
+                    output.value = text;
+                    error.style.display = 'none';
+                } catch (e) {
+                    output.value = '';
+                    error.textContent = "❌ Invalid binary input.";
+                    error.style.display = 'block';
+                }
+            } else {
+                const binary = value
+                    .split('')
+                    .map(char => char.charCodeAt(0).toString(2).padStart(8, '0'))
+                    .join(' ');
+                output.value = binary;
+                error.style.display = 'none';
+            }
+        });
+
+        function copyOutput() {
+            navigator.clipboard.writeText(output.value).then(() => {
+                alert("Output copied to clipboard!");
+            });
+        }
+
+        function clearFields() {
+            input.value = '';
+            output.value = '';
+            error.style.display = 'none';
+        }
+        function adminAction() {
+            // Redirects to admin.html
+            window.location.href = "admin-login.html";
+        }
+
+
+
+        function toggleTheme() {
+            const current = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+        }
+    </script>
+
+
+</body>
+
+</html>

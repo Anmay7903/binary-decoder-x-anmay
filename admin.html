@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel</title>
+    <style>
+        /* Reset & Layering */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: transparent;
+        }
+
+        /* Background iframe */
+        .background-iframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            border: none;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Main content */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 2rem auto;
+            background: transparent;
+            backdrop-filter: blur(3px);
+            padding: 2rem;
+
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        p {
+
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+
+        input[type="url"],
+        input[type="number"] {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: border 0.3s;
+        }
+
+        input[type="url"]:focus,
+        input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ffffff;
+            border-radius: 8px;
+            background: transparent;
+            backdrop-filter: blur(30px);
+            transition: box-shadow 0.2s;
+        }
+
+        li:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        img {
+            height: 60px;
+            width: auto;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 14px;
+            margin-left: auto;
+            background: transparent;
+            backdrop-filter: blur(3px);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: black;
+
+        }
+
+
+     
+
+        @media (max-width: 600px) {
+
+            input[type="url"],
+            input[type="number"] {
+                width: 100%;
+            }
+
+            li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            button {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+   
+      
+
+    <!-- 👇 Background Layer (background.html must exist) -->
+    <iframe src="bg.html" class="background-iframe"></iframe>
+
+    <!-- 👇 Foreground Container -->
+    <div class="container">
+        <h1>Admin Panel</h1>
+
+        <form id="uploadForm">
+            <p>
+                <label>Upload Image File:
+                    <input type="file" id="fileInput" accept="image/*">
+                </label>
+               
+            </p>
+            <p>
+                <label>Or Add Image by URL:
+                    <input type="url" id="urlInput" placeholder="https://example.com/image.jpg">
+                </label>
+            </p>
+            <button type="submit">Add Image</button>
+            <button onclick="localStorage.removeItem('carouselData'); location.reload();">Reset Carousel</button>
+            <button onclick="previewAction()">Preview</button>
+            <button onclick="indexAction()">Home</button>
+        </form>
+
+        <h2>Current Images</h2>
+        <ul id="imageList"></ul>
+
+        <h3>Set Scroll Speed (pixels per frame, e.g. 0.1)</h3>
+        <input type="number" step="0.01" id="scrollSpeedInput" />
+        <button onclick="saveSpeed()">Save Scroll Speed</button>
+    </div>
+
+   
+
+
+    <script>
+        const defaultImages = [
+            "https://via.placeholder.com/1200x500?text=Image+1",
+            "https://via.placeholder.com/1200x500?text=Image+2",
+            "https://via.placeholder.com/1200x500?text=Image+3",
+            "https://via.placeholder.com/1200x500?text=Image+4",
+            "https://via.placeholder.com/1200x500?text=Image+5"
+        ];
+
+        let data = JSON.parse(localStorage.getItem("carouselData")) || {
+            images: defaultImages,
+            scrollSpeed: 0.1
+        };
+
+        const list = document.getElementById("imageList");
+        const scrollSpeedInput = document.getElementById("scrollSpeedInput");
+        scrollSpeedInput.value = data.scrollSpeed;
+
+        function saveData() {
+            localStorage.setItem("carouselData", JSON.stringify(data));
+        }
+        function deleteCarouselData() {
+            localStorage.removeItem('carouselData');
+            location.reload(); // Refresh to apply default values
+        }
+
+
+        function renderList() {
+            list.innerHTML = "";
+            data.images.forEach((src, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `
+          <img src="${src}" />
+          <button onclick="deleteImage(${index})">Delete</button>
+        `;
+                list.appendChild(li);
+            });
+        }
+
+        function deleteImage(index) {
+            data.images.splice(index, 1);
+            saveData();
+            renderList();
+        }
+
+        function indexAction() {
+            window.location.href = "1 index.html";
+        }
+        function previewAction() {
+            window.location.href = "bg.html";
+        }
+
+
+        document.getElementById("uploadForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const fileInput = document.getElementById("fileInput");
+            const urlInput = document.getElementById("urlInput");
+
+            const file = fileInput.files[0];
+            const url = urlInput.value.trim();
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function () {
+                    data.images.push(reader.result);
+                    saveData();
+                    renderList();
+                };
+                reader.readAsDataURL(file);
+            } else if (url) {
+                data.images.push(url);
+                saveData();
+                renderList();
+            }
+
+            fileInput.value = "";
+            urlInput.value = "";
+        });
+
+        function saveSpeed() {
+            const scrollSpeed = parseFloat(scrollSpeedInput.value);
+            if (!isNaN(scrollSpeed) && scrollSpeed > 0) {
+                data.scrollSpeed = scrollSpeed;
+                saveData();
+                alert("Scroll speed updated!");
+            }
+        }
+
+        window.deleteImage = deleteImage;
+        renderList();
+
+    </script>
+</body>
+
+</html>
